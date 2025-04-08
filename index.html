@@ -1,0 +1,462 @@
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helmet Detection System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background:linear-gradient(to top,rgb(255, 255, 255),rgb(238, 243, 250));
+            font-family: 'Poppins', sans-serif;
+        }
+        #bod{
+            background:linear-gradient(to top,white,rgb(238, 243, 250));
+            
+
+        }
+    
+    header, footer {
+        width: 100%;
+        background-color: rgb(9, 17, 41);
+        text-align: center;
+        padding: 20px;
+        color: #edf1f4;
+    }
+    footer{
+        
+        height: 100px;
+        position:absolute;
+    }
+    #file-input{
+        max-width: 550px;
+        color: #5b375c;
+        background-color: #f4f0e9;
+        font-weight:500;
+    }
+
+        .container {
+            
+            max-width: 600px;
+            margin: 50px auto;
+            background: #faf8fb;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .info-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            flex: 1;
+            background: #1f2325;
+            color: rgb(245, 244, 251);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            text-align: center;
+        }
+        .info-box2 {
+            flex: 1;
+            color: rgb(251, 250, 244);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            text-align: center;
+        }
+        .info-box:hover{
+        animation: ease-in-out; 
+        padding: 20px;
+        background-color: rgb(177, 242, 80);
+        color:rgb(26, 80, 26);
+        }
+        small{
+            color:black;
+        }
+        .btn-primary,.btn-success {
+            max-width:270px;
+            height: 50px;
+            background: linear-gradient(to top, #00154c, #12376e, #23487f);
+            color: #c6fa38;
+            padding:10px;
+            border-radius: 10px;                                                                                                                                              
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 15px 30px rgba(246, 243, 243, 0.5);
+            overflow: hidden;
+            transition: 0.3s;
+          }
+          .btn-success{
+            margin-left: 130px;
+          }
+          
+
+        
+
+        .btn-primary:hover,.btn-success:hover {
+            background:linear-gradient(to top, #60a5eb, #0c121a, #18212e);;
+            color: rgb(228, 213, 244);
+        }
+
+        .preview {
+            margin: 30px auto;
+            padding: 15px;
+            background: #f6e6fa;
+            border-radius: 8px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+        }
+        #response-container{
+            background-color: transparent;
+            color: cadetblue;
+            font-weight: 600;
+            border: none;
+        }
+
+        #output-image, #output-video {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 3px solid #ebe9f7;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin: 10px auto;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Welcome to Bike Helmet Detection</h2>
+    </header>
+    <div id="bod">
+    <div class="container">
+        <div class="info-container">
+            <div class="info-box">High Accuracy<br><small>Utilizes AI-powered detection for precise helmet identification.</small></div>
+            <div class="info-box">Real-Time Processing<br><small>Instantly detects helmets in images and videos with low latency.</small></div>
+            <div class="info-box">Easy Integration<br><small>Seamlessly integrates into various applications with API support.</small></div>
+        </div>
+    </div>
+    <div class="container">
+        <h2>Helmet Detection System</h2>
+        
+        <div class="info-container">
+            <div class="info-box2">chooseFile</div>
+            <div class="info-box2">press upload and process</div>
+            <div class="info-box2">download output</div>
+        </div>
+        
+        <form id="upload-form" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="file-input" class="form-label">Upload Image/Video</label>
+                <input type="file" class="form-control" id="file-input" name="file" accept="image/*,video/*" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Upload & Process</button>
+        </form>
+
+        <div id="response-container" class="mt-4 alert alert-info" style="display: none;"></div>
+        <div id="preview-container" class="preview" style="display: none;">
+            <h4>Processed Output</h4>
+            <img id="output-image" class="img-fluid rounded">
+            <video id="output-video" class="img-fluid rounded" controls></video>
+            <a id="download-link" class="btn btn-success mt-3" href="#" download style="display: none;">Download Output</a>
+        </div>
+    </div>
+</div>
+<footer>
+    <p>&copy; 2025 Bike Helmet Detection | All Rights Reserved</p>
+</footer>
+    
+
+    <script>
+        document.getElementById("upload-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            
+            let fileInput = document.getElementById("file-input");
+            let formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            
+            document.getElementById("response-container").style.display = "block";
+            document.getElementById("response-container").innerHTML = "Processing...";
+            
+            let response = await fetch("/process", {
+                method: "POST",
+                body: formData
+            });
+            
+            let result = await response.json();
+            
+            if (result.error) {
+                document.getElementById("response-container").classList.replace("alert-info", "alert-danger");
+                document.getElementById("response-container").innerHTML = result.error;
+            } else {
+                document.getElementById("response-container").classList.replace("alert-info", "alert-success");
+                document.getElementById("response-container").innerHTML = "Processing Complete";
+                
+                let previewContainer = document.getElementById("preview-container");
+                previewContainer.style.display = "block";
+                
+                let downloadLink = document.getElementById("download-link");
+                downloadLink.href = result.output_file;
+                downloadLink.style.display = "block";
+                
+                if (result.output_file.endsWith(".jpg") || result.output_file.endsWith(".png")) {
+                    document.getElementById("output-image").src = result.output_file;
+                    document.getElementById("output-image").style.display = "block";
+                    document.getElementById("output-video").style.display = "none";
+                } else if (result.output_file.endsWith(".mp4") || result.output_file.endsWith(".avi")) {
+                    document.getElementById("output-video").src = result.output_file;
+                    document.getElementById("output-video").style.display = "block";
+                    document.getElementById("output-image").style.display = "none";
+                }
+            }
+        });
+    </script>
+    
+</body>
+</html>
+--->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helmet Detection System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(to top, #e2f5f5, #eef3fa);
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .upload-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: whitesmoke;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            padding: 2rem;
+        }
+
+        .preview-box {
+            border: 2px dashed #ced4da;
+            border-radius: 12px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            position: relative;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        #preview {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .upload-btn,#downloadLink {
+            background: linear-gradient(135deg, #00154c, #12376e);
+            color: #cef85b;
+            padding: 12px 30px;
+            border-radius: 8px;
+            border: none;
+            transition: transform 0.2s;
+        }
+
+        .upload-btn:hover,#downloadLink:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(11, 1, 70, 0.2);
+            background: rgb(233, 230, 230);
+            color:#1a2333;
+
+        
+        }
+
+        .info-card {
+            background: #1a2333;
+            color: rgb(255, 255, 255);
+            min-width: 200px;
+            min-height: 220px;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-5">AI Helmet Detection System</h1>
+        
+        <div class="upload-container">
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <i class="bi bi-shield-check fs-1 mb-3"></i>
+                        <h5>Dual Model Detection</h5>
+                        <small>Combined YOLOv8 + DETR detection</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <i class="bi bi-lightning fs-1 mb-3"></i>
+                        <h5>Real-Time Analysis</h5>
+                        <small>Process videos at 30 FPS</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <i class="bi bi-graph-up fs-1 mb-3"></i>
+                        <h5>High Accuracy</h5>
+                        <small>98% detection accuracy</small>
+                    </div>
+                </div>
+            </div>
+
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <input type="file" class="form-control" id="fileInput" accept="image/*,video/*" required>
+                </div>
+                
+                <div class="preview-box">
+                    <div id="previewMessage">Preview will appear here</div>
+                    <img id="preview" style="display: none;">
+                    <video id="videoPreview" controls style="display: none;"></video>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="upload-btn">
+                        <i class="bi bi-cloud-upload me-2"></i>
+                        Analyze Media
+                    </button>
+                </div>
+            </form>
+
+            <div class="result-box" id="resultBox">
+                <h4 class="mb-3">Detection Results</h4>
+                <div id="processedPreview" class="text-center"></div>
+                <div id="resultMessage" class="alert mt-3"></div>
+                <div class="text-center mt-4">
+                    <a id="downloadLink" class="btn btn-success" download style="display: none;">
+                        <i class="bi bi-download me-2"></i>
+                        Download Result
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Live Preview Handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('preview');
+            const videoPreview = document.getElementById('videoPreview');
+            const previewMessage = document.getElementById('previewMessage');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (file.type.startsWith('image/')) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        videoPreview.style.display = 'none';
+                        previewMessage.style.display = 'none';
+                    } else if (file.type.startsWith('video/')) {
+                        videoPreview.src = URL.createObjectURL(file);
+                        videoPreview.style.display = 'block';
+                        preview.style.display = 'none';
+                        previewMessage.style.display = 'none';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form Submission Handler
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('fileInput');
+            const resultBox = document.getElementById('resultBox');
+            const resultMessage = document.getElementById('resultMessage');
+            const processedPreview = document.getElementById('processedPreview');
+            const downloadLink = document.getElementById('downloadLink');
+
+
+            if (!fileInput.files.length) {
+                alert("Please select a file before submitting.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            resultMessage.innerHTML = '<div class="spinner-border text-primary" role="status"></div> Processing...';
+            resultMessage.className = 'alert alert-info';
+            resultBox.style.display = 'block';
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    resultMessage.className = 'alert alert-danger';
+                    resultMessage.innerHTML = data.error;
+                } else {
+                    resultMessage.className = 'alert alert-success';
+                    resultMessage.innerHTML = 'Analysis complete!';
+                    
+                    // Show processed media
+                    const processedUrl = data.output_file + '&t=' + Date.now();
+                    if (processedUrl.includes('.jpg')) {
+                        processedPreview.innerHTML = `<img src="${processedUrl}" class="img-fluid rounded">`;
+                    } else {
+                        processedPreview.innerHTML = `
+                            <video controls class="img-fluid rounded">
+                                <source src="${processedUrl}" type="video/mp4">
+                            </video>
+                        `;
+                    }
+
+                    downloadLink.href = processedUrl;
+                    downloadLink.style.display = 'inline-block';
+                }
+            } catch (error) {
+                resultMessage.className = 'alert alert-danger';
+                resultMessage.innerHTML = 'Error: ' + error.message;
+            }
+        });
+        
+            // Clear previous results
+            resultBox.style.display = 'none';
+            resultMessage.innerHTML = '';
+            processedPreview.innerHTML = '';
+            downloadLink.style.display = 'none';
+    </script>
+</body>
+</html>
